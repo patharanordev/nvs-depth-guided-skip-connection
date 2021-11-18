@@ -5,4 +5,7 @@ python train.py \
 --niter_decay 2000 \
 --save_epoch_freq 100 \
 --random_elevation \
---lr 1e-4
+--batchSize 8 \
+--gpu_ids 0 \
+--lr 1e-4 \
+--display_id 0
