@@ -38,14 +38,22 @@ class ShapeNetDataLoader(data.Dataset):
         if self.opt.isTrain:
             idx_model = self.ids[index]
             elev_a = 20 if not self.opt.random_elevation else random.randint(0, 2)*10
-            azim_a = random.randint(0, 17)*20
+            # azim_a = random.randint(0, 17)*20
+            azim_a = random.choice([
+                0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200,
+                220, 240, 260, 280, 300, 320, 340
+            ])
             id_a = '%s_%d_%d' %(idx_model, azim_a, elev_a)
 
             elev_b = 20 if not self.opt.random_elevation else random.randint(0, 2)*10
             #delta = random.choice([20 * x for x in range(-self.opt.bound, self.opt.bound+1) if x != 0] )
             delta = random.choice([10 * x for x in range(-self.opt.bound, self.opt.bound + 1) if x != 0])
 
-            azim_b = (azim_a + delta)%360
+            # azim_b = (azim_a + delta)%360
+            azim_b = random.choice([
+                0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200,
+                220, 240, 260, 280, 300, 320, 340
+            ])
             id_b = '%s_%d_%d' %(idx_model, azim_b, elev_b)
 
             A = self.load_image(id_a) / 255. * 2 - 1
