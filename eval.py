@@ -1,9 +1,11 @@
 from options.test_options import TestOptions
 from data.custom_dataset_data_loader import CustomDatasetDataLoader
+from util.visualizer import Visualizer
 from tqdm import tqdm
 import numpy as np
 import torch
 from models.base_model import BaseModel
+import time
 
 
 opt = TestOptions().parse()
@@ -18,6 +20,7 @@ data_loader = CustomDatasetDataLoader(opt)
 dataset = data_loader.load_data()
 
 model = BaseModel(opt)
+visualizer = Visualizer(opt)
 
 L1s = []
 SSIMs = []
@@ -32,6 +35,15 @@ with torch.no_grad():
         idb = '_'.join(idb[1:])
 
         model.set_input(data)
+
+        # Inference
+        stime = time.perf_counter()
+        model.forward()
+        save_result = False
+        epoch = opt.which_epoch
+        visualizer.display_current_results(model.get_current_visuals(), epoch, save_result)
+        etime = time.perf_counter()
+        print('Inference time : {}'.format((etime-stime)))
 
         model.switch_mode('eval')
 
