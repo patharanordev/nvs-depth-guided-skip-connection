@@ -8,7 +8,6 @@ from models.base_model import BaseModel
 import time
 from util import util
 import os
-import ipyplot
 
 def inference(model):
     stime = time.perf_counter()
@@ -17,13 +16,10 @@ def inference(model):
     print('Inference time : {:.2f} sec.'.format((etime-stime)))
     epoch = opt.which_epoch
     visuals = model.get_current_visuals()
-    labels, images = visuals.items()
-    ipyplot.plot_images(images, labels, max_images=4, img_width=150)
-    
-    # # Save image to file
-    # for label, image_numpy in visuals.items():
-    #     img_path = os.path.join(img_dir, 'epoch%s_%s.png' % (epoch, label))
-    #     util.save_image(image_numpy, img_path)
+    for label, image_numpy in visuals.items():
+        img_path = os.path.join(img_dir, 'epoch%s_%s.png' % (epoch, label))
+        util.save_image(image_numpy, img_path)
+
 
 
 opt = TestOptions().parse()

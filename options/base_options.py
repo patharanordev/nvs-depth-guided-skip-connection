@@ -28,7 +28,7 @@ class BaseOptions():
 
         # experiment related
         self.parser.add_argument('--nz_geo', type=int, default=200, help='number of latent points')
-        self.parser.add_argument('--category', type=str, default='car', help='model category [car|chair|kitti]')
+        self.parser.add_argument('--category', type=str, default='car', help='model category [car|chair|product|kitti]')
         self.parser.add_argument('--random_elevation', action='store_true', help='introduce elevation changes between training pairs')
 
         self.initialized = True

@@ -80,7 +80,7 @@ class BaseModel():
             self.depth_bias_vis = 0.
             self.intrinsics = torch.Tensor(intrinsics.astype(np.float32)).cuda().unsqueeze(0)
 
-        elif opt.category in ['car','chair']:
+        elif opt.category in ['car','chair','product']:
             intrinsics = np.array([480, 0, 128,
                                    0, 480, 128,
                                    0, 0, 1]).reshape((3, 3))
@@ -139,7 +139,7 @@ class BaseModel():
         return self.enc(image_tensor)
 
     def transform(self,z,RT):
-        return networks.transform_code(z, self.opt.nz_geo, RT.inverse(), object_centric=self.opt.category in ['car', 'chair'])
+        return networks.transform_code(z, self.opt.nz_geo, RT.inverse(), object_centric=self.opt.category in ['car', 'chair','product'])
 
     def decode(self,z, conv0, conv2, conv3, conv4):
         output = self.dec(z, conv0, conv2, conv3, conv4)
@@ -151,7 +151,7 @@ class BaseModel():
         output = self.depthdec(z)
         if self.opt.category in ['kitti']:
             return 1 / (10 * torch.sigmoid(output) + 0.01) # predict disparity instead of depth for natural scenes
-        elif self.opt.category in ['car', 'chair']:
+        elif self.opt.category in ['car', 'chair','product']:
             return torch.tanh(output) * self.depth_scale + self.depth_bias
 
 
@@ -230,7 +230,7 @@ class BaseModel():
 
         NV = 60
         for i in range(NV):
-            pose = np.array([0, -(i-NV/2)*np.pi/180, 0, 0, 0, 0]) if self.opt.category in ['car','chair'] \
+            pose = np.array([0, -(i-NV/2)*np.pi/180, 0, 0, 0, 0]) if self.opt.category in ['car','chair','product'] \
                 else np.array([0, 0, 0,0, 0, i / 1000])
             self.real_RT = self.get_RT(pose)
             self.forward()
@@ -261,7 +261,7 @@ class BaseModel():
 
     def get_RT(self,pose1, pose2=np.zeros(6)):
         from scipy.spatial.transform import Rotation as ROT
-        if self.opt.category in ['car','chair']:
+        if self.opt.category in ['car','chair','product']:
             T = np.array([0, 0, 2]).reshape((3, 1))
             R = ROT.from_euler('xyz', pose1[:3]).as_dcm()
             T = -R.dot(T) + T

@@ -2,7 +2,7 @@ import torch.utils.data
 
 def CreateDataset(opt):
 
-    if opt.category in ['car', 'chair']:
+    if opt.category in ['car', 'chair', 'product']:
         from data.shapenet_data_loader import ShapeNetDataLoader
         dataset = ShapeNetDataLoader()
     elif opt.category in ['kitti']:
