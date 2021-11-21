@@ -132,6 +132,28 @@ class BaseModel():
                                                                             self.conv2_tf,
                                                                             self.conv3_tf,
                                                                             self.conv4_tf)
+        
+    def predict(self, input):
+        real_A = Variable(input['A'].to(self.device))
+        real_RT = Variable(input['RT'].to(self.device))
+
+        z, conv0, conv2, conv3, conv4 = self.encode(real_A)
+        z_tf = self.transform(z,real_RT)
+        depth_tf = self.depthdecode(z_tf)
+        self.warp(real_A, depth_tf, real_RT)
+
+        conv0_tf, _, _ = inverse_warp(conv0, depth_tf,
+                                           real_RT, self.intrinsics)
+        conv2_tf, _, _ = inverse_warp(conv2, torch.nn.functional.upsample(depth_tf, scale_factor=0.25),
+                                           real_RT, self.get_K(self.intrinsics, 0.25))
+        conv3_tf, _, _ = inverse_warp(conv3, torch.nn.functional.upsample(depth_tf, scale_factor=0.125),
+                                           real_RT, self.get_K(self.intrinsics, 0.125))
+        conv4_tf, _, _ = inverse_warp(conv4, torch.nn.functional.upsample(depth_tf, scale_factor=0.0625),
+                                           real_RT, self.get_K(self.intrinsics, 0.0625))
+
+        fake_B, _, _, _ = self.decode(z_tf, conv0_tf, conv2_tf, conv3_tf, conv4_tf)
+
+        return tensor2im(fake_B.data)
 
 
         

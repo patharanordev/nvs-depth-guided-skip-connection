@@ -9,16 +9,23 @@ import time
 from util import util
 import os
 
-def inference(model):
+def inference(model, data):
+    # stime = time.perf_counter()
+    # model.forward()
+    # etime = time.perf_counter()
+    # print('Inference time : {:.2f} sec.'.format((etime-stime)))
+    # epoch = opt.which_epoch
+    # visuals = model.get_current_visuals()
+    # for label, image_numpy in visuals.items():
+    #     img_path = os.path.join(img_dir, 'epoch%s_%s.png' % (epoch, label))
+    #     util.save_image(image_numpy, img_path)
+
     stime = time.perf_counter()
-    model.forward()
+    fake_target_view_img = model.predict(data)
     etime = time.perf_counter()
     print('Inference time : {:.2f} sec.'.format((etime-stime)))
-    epoch = opt.which_epoch
-    visuals = model.get_current_visuals()
-    for label, image_numpy in visuals.items():
-        img_path = os.path.join(img_dir, 'epoch%s_%s.png' % (epoch, label))
-        util.save_image(image_numpy, img_path)
+    img_path = os.path.join(img_dir, 'predict.png')
+    util.save_image(fake_target_view_img, img_path)
 
 
 
