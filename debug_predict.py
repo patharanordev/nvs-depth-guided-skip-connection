@@ -9,13 +9,16 @@ import time
 from util import util
 import os
 
-def inference(model, data):
+def inference(model):
     stime = time.perf_counter()
-    fake_target_view_img = model.predict(data)
+    model.forward()
     etime = time.perf_counter()
     print('Inference time : {:.2f} sec.'.format((etime-stime)))
-    img_path = os.path.join(img_dir, 'predict.png')
-    util.save_image(fake_target_view_img, img_path)
+    epoch = opt.which_epoch
+    visuals = model.get_current_visuals()
+    for label, image_numpy in visuals.items():
+        img_path = os.path.join(img_dir, 'epoch%s_%s.png' % (epoch, label))
+        util.save_image(image_numpy, img_path)
 
 
 
@@ -52,7 +55,22 @@ with torch.no_grad():
         ida = '_'.join(ida[1:])
         idb = '_'.join(idb[1:])
 
+        model.set_input(data)
+
         # Inference
-        inference(model, data)
+        inference(model)
+
+        model.switch_mode('eval')
+
+        model.anim_dict = {'vis': []}
+        model.real_A = model.real_A[:1]
+        model.real_B = model.real_B[:1]
+
+        eval_res = model.evaluate()
+        L1s.append(eval_res['L1'])
+        SSIMs.append(eval_res['SSIM'])
 
         break
+
+print('L1:{l1}, SSIM:{ssim}'.format(l1=np.mean(L1s), ssim=np.mean(SSIMs)))
+
