@@ -1,4 +1,38 @@
-# Novel View Synthesis via Depth-guided Skip Connections
+# **[Single-View] NVS via Depth-guided Skip Connections**
+
+## **Requirements**
+
+- [x] Python3
+
+## **Installation**
+
+```bash
+$ pip install -r requirements.txt
+```
+
+## **Usage**
+
+Train :
+
+```
+$ sh train.sh
+```
+
+Test :
+
+```
+$ sh test.sh
+```
+
+Inference :
+
+```
+$ sh predict.sh
+```
+
+## **Reference**
+
+### Novel View Synthesis via Depth-guided Skip Connections
 Code for paper [Novel View Synthesis via Depth-guided Skip Connections](https://openaccess.thecvf.com/content/WACV2021/html/Hou_Novel_View_Synthesis_via_Depth-Guided_Skip_Connections_WACV_2021_paper.html)
 ```
 @InProceedings{Hou_2021_WACV,
@@ -11,13 +45,13 @@ Code for paper [Novel View Synthesis via Depth-guided Skip Connections](https://
 }
 ```
 
-# Data
+### Data
 Download the dataset from the [Google Drive](https://drive.google.com/drive/folders/1YbgU-JOXYsGi7yTrYb1F3niXj6nZp4Li) provided by [1] and 
 unzip the dataset under `./datasets/` folder.
 
 Download the evaluation list files from the [Google Drive](https://drive.google.com/drive/folders/1JmyCvT7pvtZ3k7aOoVnLcTetwgi-vWM-?usp=sharing). Put the corresponding file under corresponding dataset folder. E.g. `./datasets/dataset_kitti/eval_kitti.txt`.
 
-# Training
+### Training
 ```
 python train.py\
     --name chair\
@@ -32,7 +66,7 @@ If you don't want to view the real-time results, you can add command `--display_
 
 If you want to view training results and loss plots, run `python -m visdom.server` and click the URL http://localhost:8097. 
 
-# Testing
+### Testing
 Download our pre-trained model from our [Google Drive](https://drive.google.com/file/d/1xRTCSfNb40oRT6QMfchOIlh9QFIpkUmc/view?usp=sharing)
 To evaluate the performance, run 
 ```
@@ -43,7 +77,7 @@ python eval.py\
     --which_epoch best
 ```
 
-# Acknowledgments
+### Acknowledgments
 The code is based on the source code of the paper:
 
 [1] Chen, Xu and Song, Jie and Hilliges, Otmar (2019). **Monocular Neural Image-based Rendering with Continuous View Control**. In: *International Conference on Computer Vision (ICCV)*. (https://github.com/xuchen-ethz/continuous_view_synthesis), 
