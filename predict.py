@@ -1,3 +1,4 @@
+from PIL.Image import Image
 from options.test_options import TestOptions
 from data.custom_dataset_data_loader import CustomDatasetDataLoader
 from util.visualizer import Visualizer
@@ -8,6 +9,8 @@ from models.base_model import BaseModel
 import time
 from util import util
 import os
+import random
+from scipy.spatial.transform import Rotation as ROT
 
 def inference(model, data):
     stime = time.perf_counter()
@@ -17,6 +20,45 @@ def inference(model, data):
     img_path = os.path.join(img_dir, 'predict.png')
     util.save_image(fake_target_view_img, img_path)
 
+def pred_from_dataset(opt):
+    data_loader = CustomDatasetDataLoader(opt)
+    dataset = data_loader.load_data()
+    with torch.no_grad():
+        # Test some dataset
+        for _, data in enumerate(tqdm(dataset)):
+            # Inference
+            inference(model, data)
+            break
+
+def pred_from_file(opt, model, img_fpath):
+    pil_image = Image.open(img_fpath)
+    img = np.asarray(pil_image.convert('RGB'))
+    pil_image.close()
+
+    A = img / 255. * 2 - 1
+    A = torch.from_numpy(A.astype(np.float32)).permute((2, 0, 1))
+    T = np.array([0, 0, 2]).reshape((3, 1))
+
+    # Force target view angle
+    azim_b = 0
+    azim_a = random.choice([
+        0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200,
+        220, 240, 260, 280, 300, 320, 340
+    ])
+    elev_a = 20 if not opt.random_elevation else random.randint(0, 2)*10
+    elev_b = 20 if not opt.random_elevation else random.randint(0, 2)*10
+
+    RA = ROT.from_euler('xyz', [-elev_a, azim_a, 0],degrees=True).as_dcm()
+    RB = ROT.from_euler('xyz', [-elev_b, azim_b, 0],degrees=True).as_dcm()
+    R = RA.T @ RB
+    T = -R.dot(T) + T
+    mat = np.block([[R, T],
+                    [np.zeros((1, 3)), 1]])
+    data = {'A': A, 'RT': mat.astype(np.float32)}
+
+    with torch.no_grad():
+        # Inference
+        inference(model, data)
 
 
 opt = TestOptions().parse()
@@ -33,26 +75,10 @@ anim_dir = os.path.join(pred_dir, 'anim')
 print('create predict result directory %s...' % pred_dir)
 util.mkdirs([pred_dir, img_dir, anim_dir])
 
-data_loader = CustomDatasetDataLoader(opt)
-dataset = data_loader.load_data()
-
 model = BaseModel(opt)
 
-L1s = []
-SSIMs = []
-with torch.no_grad():
+# Predict image from dataset
+pred_from_dataset(opt)
 
-    # Test some dataset
-    for idx, data in enumerate(tqdm(dataset)):
-        ida = data['id_a'][0].split('_')
-        idb = data['id_b'][0].split('_')
-
-        assert (ida[0] == idb[0])
-        model_id = ida[0]
-        ida = '_'.join(ida[1:])
-        idb = '_'.join(idb[1:])
-
-        # Inference
-        inference(model, data)
-
-        break
+# # Predict image from file
+# pred_from_file(opt, model, '')
